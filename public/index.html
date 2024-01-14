@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBTS</title>
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <script type="text/javascript" src="js/qrcode.min.js"></script>
+    <script type="text/javascript" src="js/html5-qrcode.min.js"></script>
+</head>
+<body>
+    <header>
+        <button id="menuBtn"><img src="img/menu.png"></button>
+        <button id="startScanBtn"><img src="img/qr-code-scan.png"></button>
+        <button id="userBtn"><img src="img/profile-user.png"></button>
+    </header>
+    <main>
+        <div id="synopsisDiv">
+            點擊上方的<img src="img/qr-code-scan.png"><br>掃描 QR Code
+            <br><br>
+            點擊右上的<img src="img/profile-user.png"><br>登錄車票至雲端
+            <br><br>
+            點擊左上的<img src="img/menu.png"><br>查看更多資訊
+        </div>
+        <div id="ticketDiv">
+            <div id="qrcode"></div>
+            <div class="points">
+                剩餘點數: <span id="pointSpan"></span> <button id="refreshBtn"><img src="img/wifi-slash.png"></button>
+            </div>
+        </div>
+    </main>
+    <dialog id="scanDialog">
+        <button id="closeScanBtn"><img src="img/remove.png"></button>
+        <div id="reader"></div>
+    </dialog>
+    <script type="module" src="js/index.js"></script>
+</body>
+</html>

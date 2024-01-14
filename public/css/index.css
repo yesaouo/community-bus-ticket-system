@@ -1,0 +1,89 @@
+*{
+    padding: 0;
+    margin: 0;
+    font-family: 'Heebo', sans-serif;
+    user-select: none;
+    -webkit-user-select: none; /* 兼容 WebKit 浏览器 */
+    -moz-user-select: none; /* 兼容 Firefox 浏览器 */
+    -ms-user-select: none; /* 兼容 IE/Edge 浏览器 */
+}
+html, body {
+    width: 100%;
+    height: 100%;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+button {
+    cursor: pointer;
+}
+header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    box-sizing: border-box;
+    padding: 10px;
+}
+header button, #closeScanBtn, #refreshBtn {
+    border: none;
+    background-color: transparent;
+}
+header button img, #closeScanBtn img {
+    width: 48px;
+    height: 48px;
+}
+#refreshBtn {
+    position: relative;
+    top: 5px;
+}
+#refreshBtn img {
+    width: 32px;
+    height: 32px;
+}
+main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#synopsisDiv {
+    font-size: 24px;
+}
+#synopsisDiv img {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+}
+.points {
+    box-sizing: border-box;
+    padding: 10px;
+    font-size: 24px;
+}
+#scanDialog {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    box-sizing: border-box;
+}
+#closeScanBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+}
+#reader {
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+#reader video {
+    max-width: 100%;
+    max-height: 100%;
+}
+#ticketDiv {
+    display: none;
+}
