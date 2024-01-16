@@ -84,6 +84,42 @@ main {
     max-width: 100%;
     max-height: 100%;
 }
-#ticketDiv {
+#ticketDiv, #mergeDiv {
     display: none;
+}
+
+#mergeDiv {
+    width: 256px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+#mergeTextDiv {
+    margin-bottom: 20px;
+    font-size: 18px;
+    line-height: 1.6;
+}
+.buttons {
+    display: flex;
+    justify-content: space-between;
+}
+#mergeBtn, #unmergeBtn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+}
+#mergeBtn {
+    background-color: #007BFF;
+}
+#mergeBtn:hover {
+    background-color: #0056b3;
+}
+#unmergeBtn {
+    background-color: #f44336;
+}
+#unmergeBtn:hover {
+    background-color: #d32f2f;
 }
