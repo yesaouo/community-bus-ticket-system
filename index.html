@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="public/js/qrcode.min.js"></script>
+</head>
+<body>
+    <div id="qrcode"></div>
+    <script>
+const qrcode = new QRCode(document.getElementById("qrcode"), {
+	width: 192,
+	height: 192,
+	colorDark : "#000000",
+	colorLight : "#ffffff",
+	correctLevel : QRCode.CorrectLevel.H
+});
+qrcode.makeCode("OIttiFzFexNlpoP9WFYk");
+    </script>
+</body>
+</html>

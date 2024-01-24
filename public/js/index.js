@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -24,62 +24,127 @@ const analytics = getAnalytics(app);
 const auth = getAuth();
 const db = getFirestore(app);
 
-async function setTicket(id) {
-    const localId = localStorage.getItem('CBTS-Ticket');
-    if (localId && localId === id) {
-        const localPoint = await getTicket(localId);
-        if (localPoint) {
-            setTicketDiv(localId, localPoint);
-        }
-    } else {
-        const localPoint = await getTicket(localId);
-        const cloudPoint = await getTicket(id);
-        if (localPoint && cloudPoint) {
-            mergeTextDiv.innerHTML = `本地餘額: ${localPoint}<br>帳戶餘額: ${cloudPoint}`;
-            unmergeBtn.innerHTML = '取消登入';
-            synopsisDiv.style.display = 'none';
-            ticketDiv.style.display = 'none';
-            mergeDiv.style.display = 'block';
-
-            unmergeBtn.onclick = () => {
-                auth.signOut();
-                alert('已登出');
-            }
-            mergeBtn.onclick = () => {
-                if (confirm('')) {
-                    //下載原本車票並變更 合併給管理員
-                }
-            }
-        } else if (localPoint) {
-            setTicketDiv(localId, localPoint);
-        } else if (cloudPoint) {
-            setTicketDiv(id, cloudPoint);
-        }
+async function getTicketPoint(id) {
+    if (typeof id === 'string' && id.length === 20) {
+        const docSnap = await getDoc(doc(db, "tickets", id));
+        if (docSnap.exists() && docSnap.data().point !== null)
+            return parseInt(docSnap.data().point);
     }
-
-    async function getTicket(id) {
-        if (id && typeof id === 'string' && id.length === 20) {
-            const docSnap = await getDoc(doc(db, "tickets", id));
-            if (docSnap.exists() && docSnap.data().point)
-                return docSnap.data().point;
-        }
-        return null;
+    return null;
+}
+async function getUserTickets() {
+    let tickets = [], point = 0;
+    if (auth.currentUser) {
+        const docSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+        if (docSnap.exists() && docSnap.data().tickets) {
+            tickets = docSnap.data().tickets;
+            for (const ticket of tickets)
+                point += await getTicketPoint(ticket);
+        } else { await setDoc(doc(db, "users", uid), { tickets: [] }); }
     }
-    function setTicketDiv(id, point) {
-        qrcode.makeCode(`CBTS${id}`);
-        pointSpan.innerHTML = point;
-        refreshBtn.innerHTML = '<img src="img/refresh.png">';
-        synopsisDiv.style.display = 'none';
-        mergeDiv.style.display = 'none';
-        ticketDiv.style.display = 'block';
+    return { tickets, point };
+}
+async function mergeTicket(id) {
+    if (auth.currentUser) {
+        const uid = auth.currentUser.uid;
+        await updateDoc(doc(db, "users", uid), { tickets: arrayUnion(id) });
+        const docSnap = await getDoc(doc(db, "users", uid));
+        if (docSnap.exists() && docSnap.data().tickets) {
+            let point = 0;
+            for (const ticket of docSnap.data().tickets)
+                point += await getTicketPoint(ticket);
+            setTicketDiv(uid, point);
+        }
     }
 }
+function setTicketDiv(id, point) {
+    localStorage.setItem('CBTS-Ticket', id);
+    localStorage.setItem('CBTS-Point', point);
+    qrcode.makeCode(`CBTS${id}`);
+    pointSpan.innerHTML = point;
+    refreshBtn.innerHTML = '<img src="img/refresh.png">';
+    closeSynopsisDiv();
+    closeMergeDiv();
+    ticketDiv.style.display = 'block';
+}
+function closeTicketDiv() {
+    ticketDiv.style.display = 'none';
+    refreshBtn.onclick = () => {};
+}
+function openSynopsisDiv() {
+    closeTicketDiv();
+    closeMergeDiv();
+    synopsisDiv.style.display = 'block';
+}
+function closeSynopsisDiv() {
+    synopsisDiv.style.display = 'none';
+}
+function openMergeDiv() {
+    closeSynopsisDiv();
+    closeTicketDiv();
+    mergeDiv.style.display = 'block';
+}
+function closeMergeDiv() {
+    mergeDiv.style.display = 'none';
+    unmergeBtn.onclick = () => {};
+    mergeBtn.onclick = () => {};
+}
+
+const qrCodeSuccessCallback = async(decodedText, decodedResult) => {
+    stopScan();
+    const id = decodedText;
+    let localId = localStorage.getItem('CBTS-Ticket') || null;
+    if (typeof id === 'string' && id.length === 20) {
+        const point = await getTicketPoint(id);
+        if (point !== null) {
+            if (auth.currentUser) {
+                const uid = auth.currentUser.uid;
+                const { tickets, authPoint } = await getUserTickets();
+                if (!tickets.includes(id)) {
+                    mergeTextDiv.innerHTML = `掃描餘額: ${point}<br>帳戶餘額: ${authPoint}`;
+                    unmergeBtn.innerHTML = '退出掃描';
+                    mergeBtn.innerHTML = '上傳雲端';
+                    unmergeBtn.onclick = () => { setTicketDiv(uid, authPoint); }
+                    mergeBtn.onclick = () => { mergeTicket(id); }
+                    openMergeDiv();
+                } else { alert('此車票已綁定在帳戶中') }
+            } else if (typeof localId === 'string' && localId.length === 20) {
+                if (localId !== id) {
+                    const localPoint = await getTicketPoint(localId);
+                    if (localPoint !== null) {
+                        mergeTextDiv.innerHTML = `本地餘額: ${localPoint}<br>掃描餘額: ${point}`;
+                        unmergeBtn.innerHTML = '退出掃描';
+                        mergeBtn.innerHTML = '變更車票';
+                        unmergeBtn.onclick = () => { setTicketDiv(localId, localPoint); }
+                        mergeBtn.onclick = () => {
+                            if (confirm('確定要嗎'))
+                                setTicketDiv(id, point);
+                        }
+                        openMergeDiv();
+                    } else { setTicketDiv(id, point); }
+                } else { setTicketDiv(id, point); }
+            } else { setTicketDiv(id, point); }
+        } else { alert('查無此車票'); }
+    } else { alert('查無此車票'); }
+};
+
 onAuthStateChanged(auth, async(user) => {
     if (user) {
         userBtn.innerHTML = `<img src="${user.photoURL}">`;
-        const docSnap = await getDoc(doc(db, "users", user.uid));
-        if (docSnap.exists() && docSnap.data().ticket)
-            setTicket(docSnap.data().ticket);
+        const uid = user.uid;
+        const { tickets, authPoint } = await getUserTickets();
+        const id = localStorage.getItem('CBTS-Ticket') || null;
+        const point = await getTicketPoint(id);
+        if (point !== null) {
+            if (!tickets.includes(id)) {
+                mergeTextDiv.innerHTML = `本地餘額: ${point}<br>帳戶餘額: ${authPoint}`;
+                unmergeBtn.innerHTML = '取消登入';
+                mergeBtn.innerHTML = '上傳雲端';
+                unmergeBtn.onclick = () => { auth.signOut(); }
+                mergeBtn.onclick = () => { mergeTicket(id); }
+                openMergeDiv();
+            } else { setTicketDiv(uid, authPoint); }
+        } else { setTicketDiv(uid, authPoint); }
 
         userBtn.onclick = () => {
             if (confirm('確定要登出嗎'))
@@ -87,8 +152,11 @@ onAuthStateChanged(auth, async(user) => {
         }
     } else {
         userBtn.innerHTML = '<img src="img/profile-user.png">';
-        if (localStorage.getItem('CBTS-Ticket'))
-            setTicket(localStorage.getItem('CBTS-Ticket'));
+        const id = localStorage.getItem('CBTS-Ticket') || null;
+        const point = await getTicketPoint(id);
+        if (point !== null) {
+            setTicketDiv(id, point);
+        } else { openSynopsisDiv(); }
 
         userBtn.onclick = () => {
             if (confirm('將跳轉至Google進行第三方登入\n如果未能自動跳轉，請確保您開啟了"彈出式視窗與重新導向"的權限。')) {
@@ -109,18 +177,12 @@ const qrcode = new QRCode(document.getElementById("qrcode"), {
 	correctLevel : QRCode.CorrectLevel.H
 });
 const html5QrCode = new Html5Qrcode("reader");
-const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-    /* handle success */
-    alert(decodedText);
-    qrcode.makeCode(decodedText);
-    stopScan();
-};
 
 function startScan() {
     scanDialog.showModal();
     html5QrCode.start(
         { facingMode: "environment" }, 
-        { fps: 10, qrbox: { width: 256, height: 256 } },
+        { fps: 10 },
         qrCodeSuccessCallback
     ).catch((err) => {
       // Start failed, handle it.
@@ -140,7 +202,3 @@ startScanBtn.onclick = () => {
 closeScanBtn.onclick = () => {
     stopScan();
 }
-
-
-//qrcode.clear(); // clear the code.
-//qrcode.makeCode("CBTS01234567890123465789"); // make another code.
