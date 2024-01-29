@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBTS</title>
+    <title>CBTS-offline</title>
     <script>
-        if (!navigator.onLine) { window.location.href = 'offline.html'; }
+        if (navigator.onLine) { window.location.href = 'index.html'; }
     </script>
     <link rel="stylesheet" type="text/css" href="css/styles.css">
     <link rel="stylesheet" type="text/css" href="css/info.css">
-    <link rel="stylesheet" type="text/css" href="css/scan.css">
     <script type="text/javascript" src="js/scripts.js"></script>
     <script type="text/javascript" src="js/qrcode.min.js"></script>
-    <script type="text/javascript" src="js/html5-qrcode.min.js"></script>
 </head>
 <body>
     <header>
@@ -33,21 +31,10 @@
             <div class="points">
                 剩餘點數:
                 <span id="pointSpan"></span>
-                <button id="refreshBtn"><img src="img/refresh.png"></button>
-            </div>
-        </div>
-        <div id="mergeDiv">
-            <div id="mergeTextDiv"></div>
-            <div class="buttons">
-                <button id="unmergeBtn">取消登入</button>
-                <button id="mergeBtn">上傳雲端</button>
+                <button id="refreshBtn"><img src="img/wifi-slash.png"></button>
             </div>
         </div>
     </main>
-    <dialog id="scanDialog">
-        <button id="closeScanBtn"><img src="img/remove.png"></button>
-        <div id="reader"></div>
-    </dialog>
     <dialog id="infoDialog">
         <button id="closeInfoBtn"><img src="img/remove.png"></button>
         <div class="infoDiv">
@@ -61,6 +48,6 @@
             </section>
         </div>
     </dialog>
-    <script type="module" src="js/index.js"></script>
+    <script type="module" src="js/offline.js"></script>
 </body>
 </html>
