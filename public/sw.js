@@ -1,4 +1,4 @@
-const cacheName = "store-test";
+const cacheName = "store-v0.1";
 const assets = [
     '/',
     '/index.html',
@@ -8,6 +8,7 @@ const assets = [
     '/css/scan.css',
     '/css/styles.css',
     '/img/',
+    '/img/caution.png',
     '/img/profile-user.png',
     '/img/qr-code-scan.png',
     '/img/question-mark.png',

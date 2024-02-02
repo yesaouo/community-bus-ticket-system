@@ -57,6 +57,12 @@
     transition: max-height 0.2s ease-out;
     background-color: #07C2FF;
 }
-.infoSection div p {
+.infoSection p {
     padding: 24px;
+}
+.infoSection img {
+    position: relative;
+    top: 4px;
+    width: 20px;
+    height: 20px;
 }
