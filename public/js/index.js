@@ -25,55 +25,71 @@ const auth = getAuth();
 const db = getFirestore(app);
 
 async function getTicketPoint(id) {
-    if (typeof id === 'string' && id.length === 20) {
-        const docSnap = await getDoc(doc(db, "tickets", id));
-        if (docSnap.exists() && docSnap.data().point !== null)
-            return parseInt(docSnap.data().point);
-    }
-    return null;
-}
-async function getUserTickets() {
-    let tickets = [], point = 0;
-    if (auth.currentUser) {
-        const docSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
-        if (docSnap.exists() && docSnap.data().tickets) {
-            tickets = docSnap.data().tickets;
-            for (const ticket of tickets)
-                point += await getTicketPoint(ticket);
-        } else { await setDoc(doc(db, "users", uid), { tickets: [] }); }
-    }
-    return [ tickets, point ];
+    try {
+        if (id.length === 20) {
+            const ticketSnap = await getDoc(doc(db, "tickets", id));
+            return parseInt(ticketSnap.data().point);
+        }
+        return null;
+    } catch { return null; }
 }
 async function mergeTicket(id) {
-    if (auth.currentUser) {
+    try {
         const uid = auth.currentUser.uid;
-        await updateDoc(doc(db, "users", uid), { tickets: arrayUnion(id) });
-        const docSnap = await getDoc(doc(db, "users", uid));
-        if (docSnap.exists() && docSnap.data().tickets) {
-            let point = 0;
-            for (const ticket of docSnap.data().tickets)
-                point += await getTicketPoint(ticket);
-            setTicketDiv(uid, point);
+        const userRef = doc(db, "users", uid);
+        await updateDoc(userRef, { tickets: arrayUnion(id) });
+        const userSnap = await getDoc(userRef);
+        const tickets = userSnap.data().tickets;
+        let point = 0;
+        for (let i = 0; i < tickets.length; i++) {
+            const ticketSnap = await getDoc(doc(db, "tickets", tickets[i]));
+            if (ticketSnap.exists() && ticketSnap.data().point !== null && parseInt(ticketSnap.data().point))
+                point += parseInt(ticketSnap.data().point);
         }
+        setTicketDiv(uid, point);
+    } catch {
+        auth.signOut();
+        alert('很抱歉，系統出了點問題，請重新登入帳號');
     }
 }
 onAuthStateChanged(auth, async(user) => {
+    const id = localStorage.getItem('CBTS-ID') || null;
     if (user) {
         userBtn.innerHTML = `<img src="${user.photoURL}">`;
         const uid = user.uid;
-        const [ tickets, authPoint ] = await getUserTickets();
-        const id = localStorage.getItem('CBTS-ID') || null;
-        const point = await getTicketPoint(id);
-        if (point !== null) {
+        const userRef = doc(db, "users", uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists() && Array.isArray(userSnap.data().tickets) && userSnap.data().tickets.length > 0) {
+            const tickets = userSnap.data().tickets;
+            let point = 0;
+            for (let i = 0; i < tickets.length; i++) {
+                const ticketSnap = await getDoc(doc(db, "tickets", tickets[i]));
+                if (ticketSnap.exists() && ticketSnap.data().point !== null && parseInt(ticketSnap.data().point))
+                    point += parseInt(ticketSnap.data().point);
+            }
             if (!tickets.includes(id)) {
-                mergeTextDiv.innerHTML = `本地餘額: ${point}<br>帳戶餘額: ${authPoint}`;
+                const localPoint = await getTicketPoint(id);
+                if (localPoint !== null) {
+                    mergeTextDiv.innerHTML = `本地餘額: ${localPoint}<br>帳戶餘額: ${point}`;
+                    unmergeBtn.innerHTML = '取消登入';
+                    mergeBtn.innerHTML = '存入帳戶';
+                    unmergeBtn.onclick = () => { auth.signOut(); }
+                    mergeBtn.onclick = () => { mergeTicket(id); }
+                    openMergeDiv();
+                } else { setTicketDiv(uid, point); }
+            } else { setTicketDiv(uid, point); }
+        } else {
+            await setDoc(userRef, { tickets: [] });
+            const localPoint = await getTicketPoint(id);
+            if (localPoint !== null) {
+                mergeTextDiv.innerHTML = `本地餘額: ${localPoint}<br>此帳戶尚未登錄車票`;
                 unmergeBtn.innerHTML = '取消登入';
-                mergeBtn.innerHTML = '上傳雲端';
+                mergeBtn.innerHTML = '登錄車票';
                 unmergeBtn.onclick = () => { auth.signOut(); }
                 mergeBtn.onclick = () => { mergeTicket(id); }
                 openMergeDiv();
-            } else { setTicketDiv(uid, authPoint); }
-        } else { setTicketDiv(uid, authPoint); }
+            } else { setTicketDiv(uid, 0); }
+        }
 
         userBtn.onclick = () => {
             if (confirm('確定要登出嗎'))
@@ -81,7 +97,6 @@ onAuthStateChanged(auth, async(user) => {
         }
     } else {
         userBtn.innerHTML = '<img src="img/profile-user.png">';
-        const id = localStorage.getItem('CBTS-ID') || null;
         const point = await getTicketPoint(id);
         if (point !== null) {
             setTicketDiv(id, point);
@@ -95,44 +110,6 @@ onAuthStateChanged(auth, async(user) => {
         }
     }
 });
-
-const qrCodeSuccessCallback = async(decodedText, decodedResult) => {
-    stopScan();
-    const id = decodedText;
-    const localId = localStorage.getItem('CBTS-ID') || null;
-    if (typeof id === 'string' && id.length === 20) {
-        const point = await getTicketPoint(id);
-        if (point !== null) {
-            if (auth.currentUser) {
-                const uid = auth.currentUser.uid;
-                const [ tickets, authPoint ] = await getUserTickets();
-                if (!tickets.includes(id)) {
-                    mergeTextDiv.innerHTML = `掃描餘額: ${point}<br>帳戶餘額: ${authPoint}`;
-                    unmergeBtn.innerHTML = '退出掃描';
-                    mergeBtn.innerHTML = '上傳雲端';
-                    unmergeBtn.onclick = () => { setTicketDiv(uid, authPoint); }
-                    mergeBtn.onclick = () => { mergeTicket(id); }
-                    openMergeDiv();
-                } else { alert('此車票已綁定在帳戶中') }
-            } else if (typeof localId === 'string' && localId.length === 20) {
-                if (localId !== id) {
-                    const localPoint = await getTicketPoint(localId);
-                    if (localPoint !== null) {
-                        mergeTextDiv.innerHTML = `本地餘額: ${localPoint}<br>掃描餘額: ${point}`;
-                        unmergeBtn.innerHTML = '退出掃描';
-                        mergeBtn.innerHTML = '變更車票';
-                        unmergeBtn.onclick = () => { setTicketDiv(localId, localPoint); }
-                        mergeBtn.onclick = () => {
-                            if (confirm('點擊變更車票按鈕後，請留意：若您的車票未保存，可能導致遺失，或需前往服務中心進行車票合併。'))
-                                setTicketDiv(id, point);
-                        }
-                        openMergeDiv();
-                    } else { setTicketDiv(id, point); }
-                } else { setTicketDiv(id, point); }
-            } else { setTicketDiv(id, point); }
-        } else { alert('查無此車票'); }
-    } else { alert('查無此車票'); }
-};
 
 const qrcode = new QRCode(document.getElementById("qrcode"), {
 	width: 192,
@@ -163,13 +140,68 @@ function openMergeDiv() {
     mergeDiv.style.display = 'block';
 }
 function startScan() {
+    const qrCodeSuccessCallback = async(id, decodedResult) => {
+        stopScan();
+        const localId = localStorage.getItem('CBTS-ID') || null;
+        if (typeof id === 'string' && id.length === 20) {
+            const point = await getTicketPoint(id);
+            if (point !== null) {
+                if (auth.currentUser) {
+                    const uid = auth.currentUser.uid;
+                    const userRef = doc(db, "users", uid);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists() && Array.isArray(userSnap.data().tickets) && userSnap.data().tickets.length > 0) {
+                        const tickets = userSnap.data().tickets;
+                        let authPoint = 0;
+                        for (let i = 0; i < tickets.length; i++) {
+                            const ticketSnap = await getDoc(doc(db, "tickets", tickets[i]));
+                            if (ticketSnap.exists() && ticketSnap.data().point !== null && parseInt(ticketSnap.data().point))
+                                authPoint += parseInt(ticketSnap.data().point);
+                        }
+                        if (!tickets.includes(id)) {
+                            mergeTextDiv.innerHTML = `掃描餘額: ${point}<br>帳戶餘額: ${authPoint}`;
+                            unmergeBtn.innerHTML = '退出掃描';
+                            mergeBtn.innerHTML = '存入帳戶';
+                            unmergeBtn.onclick = () => { setTicketDiv(uid, authPoint); }
+                            mergeBtn.onclick = () => { mergeTicket(id); }
+                            openMergeDiv();
+                        } else { alert('此車票已綁定在帳戶中'); }
+                    } else {
+                        mergeTextDiv.innerHTML = `掃描餘額: ${point}<br>此帳戶尚未登錄車票`;
+                        unmergeBtn.innerHTML = '退出掃描';
+                        mergeBtn.innerHTML = '登錄車票';
+                        unmergeBtn.onclick = () => { setTicketDiv(uid, 0); }
+                        mergeBtn.onclick = () => { mergeTicket(id); }
+                        openMergeDiv();
+                    }
+                } else if (typeof localId === 'string' && localId.length === 20) {
+                    if (localId !== id) {
+                        const localPoint = await getTicketPoint(localId);
+                        if (localPoint !== null) {
+                            mergeTextDiv.innerHTML = `本地餘額: ${localPoint}<br>掃描餘額: ${point}`;
+                            unmergeBtn.innerHTML = '退出掃描';
+                            mergeBtn.innerHTML = '變更車票';
+                            unmergeBtn.onclick = () => { setTicketDiv(localId, localPoint); }
+                            mergeBtn.onclick = () => {
+                                if (confirm('點擊變更車票按鈕後，請留意：若您的車票未保存，可能導致遺失，或需前往服務中心進行車票合併。'))
+                                    setTicketDiv(id, point);
+                            }
+                            openMergeDiv();
+                        } else { setTicketDiv(id, point); }
+                    } else { setTicketDiv(id, point); }
+                } else { setTicketDiv(id, point); }
+            } else { alert('查無此車票'); }
+        } else { alert('查無此車票'); }
+    };
+
     scanDialog.showModal();
     html5QrCode.start(
         { facingMode: "environment" }, 
         { fps: 10 },
         qrCodeSuccessCallback
     ).catch((err) => {
-      // Start failed, handle it.
+        scanDialog.close();
+        alert(err);
     });
 }
 function stopScan() {
@@ -194,13 +226,30 @@ closeInfoBtn.onclick = () => {
     infoDialog.close();
 }
 refreshBtn.onclick = async() => {
-    const id = localStorage.getItem('CBTS-ID') || null;
-    let point = 0, tickets = [];
-    if (typeof id === 'string') {
-        if (id.length === 20)
-            point = await getTicketPoint(localStorage.getItem('CBTS-ID'));
-        if (id.length === 28)
-            [ tickets, point ] = await getUserTickets();
+    let id = localStorage.getItem('CBTS-ID') || null;
+    if (auth.currentUser)
+        id = auth.currentUser.uid;
+    const point = await getPoint(id);
+    if (point !== null) {
+        setTicketDiv(id, point);
+    } else { openSynopsisDiv(); }
+
+    async function getPoint(id) {
+        try {
+            if (id.length === 20) {
+                const ticketSnap = await getDoc(doc(db, "tickets", id));
+                return parseInt(ticketSnap.data().point);
+            } else if (id.length === 28) {
+                let point = 0;
+                const tickets = userSnap.data().tickets;
+                for (let i = 0; i < tickets.length; i++) {
+                    const ticketSnap = await getDoc(doc(db, "tickets", tickets[i]));
+                    if (ticketSnap.exists() && ticketSnap.data().point !== null && parseInt(ticketSnap.data().point))
+                        point += parseInt(ticketSnap.data().point);
+                }
+                return point;
+            }
+            return null;
+        } catch { return null; }
     }
-    pointSpan.innerHTML = point || 0;
 }
