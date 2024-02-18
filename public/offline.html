@@ -2,11 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <link rel="icon" sizes="192x192" href="img/AppImages/CBTS192.png">
+    <link rel="apple-touch-icon" href="img/AppImages/CBTS192.png" sizes="192x192">
+    <meta name="msapplication-TileImage192x192" content="img/AppImages/CBTS192.png">
+    <meta name="theme-color" content="#1D3557">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#1D3557">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="CBTS">
     <title>CBTS-offline</title>
     <script>
         if (navigator.onLine) { window.location.href = 'index.html'; }
     </script>
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" type="text/css" href="css/styles.css">
     <link rel="stylesheet" type="text/css" href="css/info.css">
     <script type="text/javascript" src="js/scripts.js"></script>
@@ -20,9 +30,9 @@
     </header>
     <main>
         <div id="synopsisDiv">
-            點擊上方的<img src="img/qr-code-scan.png"><br>掃描 QR Code
+            點擊上方的<img src="img/qr-code-scan.png"><br>掃描車票QR碼
             <br><br>
-            點擊右上的<img src="img/profile-user.png"><br>登錄車票至雲端
+            點擊右上的<img src="img/profile-user.png"><br>登入系統
             <br><br>
             點擊左上的<img src="img/question-mark.png"><br>查看更多資訊
         </div>
@@ -39,12 +49,56 @@
         <button id="closeInfoBtn"><img src="img/remove.png"></button>
         <div class="infoDiv">
             <section class="infoSection">
-                <button id="button1" onclick="toggleContent('1')">問題1</button>
-                <div id="content1"><p>這是答案。</p></div>
+                <button id="button1" onclick="toggleContent('1')">我該怎麼註冊帳戶?</button>
+                <div id="content1">
+                    <p>點擊主畫面右上角的<img src="img/profile-user.png">，透過 Google 帳戶註冊並登入。<br>
+                        <img src="img/caution.png">請確保已啟用「彈出式視窗與重新導向」權限。</p>
+                </div>
             </section>
             <section class="infoSection">
-                <button id="button2" onclick="toggleContent('2')">問題2</button>
-                <div id="content2"><p>這是答案。</p></div>
+                <button id="button2" onclick="toggleContent('2')">為什麼要用 Google 帳號註冊?</button>
+                <div id="content2">
+                    <p>使用 Google 第三方登入有以下幾個優點：<br>
+                        安全性：Google 的安全標準非常高，使用 Google 登入可以保護您的帳戶免受不必要的風險。<br>
+                        便利性：如果您已經有 Google 帳戶，那麼您可以直接使用該帳戶登入，無需再設置新的用戶名和密碼。<br>
+                        隱私保護：我們不會直接存儲您的密碼，這可以降低您的資訊被洩露的風險。</p>
+                </div>
+            </section>
+            <section class="infoSection">
+                <button id="button3" onclick="toggleContent('3')">登入帳號對我有甚麼好處?</button>
+                <div id="content3">
+                    <p>登入後，您可以將多張車票合併到帳戶中，這將使您的餘額管理更加方便。<br>
+                        由於車票保存在雲端，您可以在任何設備上登入您的帳號並使用您的車票。</p>
+                </div>
+            </section>
+            <section class="infoSection">
+                <button id="button4" onclick="toggleContent('4')">我該怎麼綁定車票?</button>
+                <div id="content4">
+                    <p>點擊主畫面上方的<img src="img/qr-code-scan.png">，掃描紙本車票。<br>
+                        <img src="img/caution.png">未登入用戶只能保留一張車票。<br>
+                        <img src="img/caution.png">請確保已啟用「攝影機」權限。</p>
+                </div>
+            </section>
+            <section class="infoSection">
+                <button id="button5" onclick="toggleContent('5')">車票上傳至帳戶後還可以使用嗎?</button>
+                <div id="content5">
+                    <p>只有帳號中上傳的第一張車票會被保留。<br>
+                        <img src="img/caution.png">後面上傳的車票形同儲值，會在乘車扣款時完成合併並刪除。</p>
+                </div>
+            </section>
+            <section class="infoSection">
+                <button id="button6" onclick="toggleContent('6')">這個系統可以離線使用嗎?</button>
+                <div id="content6">
+                    <p>我們的系統使用了 Service Worker 技術，這意味著您可以在離線時存取我們的網頁。此外，我們的系統也支援 PWA (Progressive Web Apps)，您可以將我們的網站下載成應用程式，方便您隨時使用。<br>
+                        <img src="img/caution.png">部分功能需在連網時才可使用。</p>
+                </div>
+            </section>
+            <section class="infoSection">
+                <button id="button7" onclick="toggleContent('7')">更多的問題?</button>
+                <div id="content7">
+                    <p>服務中心: XXXX-XXXX (禮拜一公休)<br>
+                        聯繫作者: <a href="mailto:ethan147852369@gmail.com?subject=CBTS-聯繫作者">ethan147852369@gmail.com</a></p>
+                </div>
             </section>
         </div>
     </dialog>

@@ -2,25 +2,19 @@ const cacheName = "store-v0.2";
 const assets = [
     '/',
     '/index.html',
-    '/offline.html',
     '/css/',
-    '/css/info.css',
+    '/css/alert.css',
     '/css/scan.css',
+    '/css/sign.css',
     '/css/styles.css',
     '/img/',
-    '/img/caution.png',
-    '/img/profile-user.png',
-    '/img/qr-code-scan.png',
-    '/img/question-mark.png',
-    '/img/refresh.png',
+    '/img/cbts.png',
     '/img/remove.png',
     '/img/wifi-slash.png',
     '/js/',
     '/js/html5-qrcode.min.js',
-    '/js/qrcode.min.js',
-    '/js/scripts.js',
     '/js/index.js',
-    '/js/offline.js'
+    '/js/scripts.js'
 ];
 
 self.addEventListener('install', (e) => {

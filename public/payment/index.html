@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <link rel="icon" sizes="192x192" href="img/AppImages/CBTS192.png">
+    <link rel="apple-touch-icon" href="img/AppImages/CBTS192.png" sizes="192x192">
+    <meta name="msapplication-TileImage192x192" content="img/AppImages/CBTS192.png">
+    <meta name="theme-color" content="#1D3557">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#1D3557">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="CBTS-Payment">
+    <title>CBTS-Payment</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link rel="stylesheet" type="text/css" href="css/scan.css">
+    <link rel="stylesheet" type="text/css" href="css/sign.css">
+    <link rel="stylesheet" type="text/css" href="css/alert.css">
+    <script type="text/javascript" src="js/scripts.js"></script>
+    <script type="text/javascript" src="js/html5-qrcode.min.js"></script>
+</head>
+<body>
+    <button class="button" id="halfTicket">半票</button>
+    <button class="button" id="fullTicket">全票</button>
+    <dialog id="scanDialog">
+        <button id="closeScanBtn"><img src="img/remove.png"></button>
+        <div id="reader"></div>
+    </dialog>
+    <dialog id="alertDialog">
+        <p id="alertMsgP">車票格式有誤或是系統發生錯誤</p>
+        <p id="alertTimeP">如有任何問題請洽服務中心詢問</p>
+        <button id="alertBtn">關閉</button>
+    </dialog>
+    <dialog id="signDialog">
+        <div class="sign-header">
+            <span>CBTS</span>
+            <img src="img/cbts.png" alt="CBTS">
+        </div>
+        <div class="sign-content">
+            <div class="column">
+                <div class="sign-inputs">
+                    <input type="text" id="nameInput" placeholder="輸入您的名字">
+                    <input type="password" id="pinInput" placeholder="輸入您的專屬PIN碼">
+                </div>
+                <button id="loginBtn">登入</button>
+            </div>
+            <p id="errorP">新司機或是忘記PIN碼請聯絡服務中心</p>
+        </div>
+    </dialog>
+
+    <script type="module" src="js/index.js"></script>
+</body>
+</html>

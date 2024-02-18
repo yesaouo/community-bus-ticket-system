@@ -146,7 +146,7 @@ const html5QrCode = new Html5Qrcode("reader");
 function setTicketDiv(id, point) {
     localStorage.setItem('CBTS-ID', id);
     localStorage.setItem('CBTS-Point', point);
-    qrcode.makeCode(`CBTS${id}`);
+    qrcode.makeCode(`CBTS:${id}`);
     pointSpan.innerHTML = point;
     synopsisDiv.style.display = 'none';
     mergeDiv.style.display = 'none';

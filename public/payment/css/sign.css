@@ -1,0 +1,58 @@
+#signDialog {
+    background-color: #f5f5f5;
+    border-radius: 5px;
+    padding: 20px;
+}
+
+.sign-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sign-header span {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.sign-header img {
+    height: 50px;
+}
+
+.sign-content {
+    margin-top: 20px;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sign-inputs {
+    display: contents;
+}
+
+.sign-inputs input {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+#loginBtn {
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+}
+
+#loginBtn:hover {
+    background-color: #0056b3;
+}
+
+#errorP {
+    color: red;
+    text-align: center;
+}
