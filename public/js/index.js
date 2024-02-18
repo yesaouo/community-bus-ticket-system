@@ -75,9 +75,8 @@ onAuthStateChanged(auth, async(user) => {
                     mergeBtn.innerHTML = '存入帳戶';
                     unmergeBtn.onclick = () => { auth.signOut(); }
                     mergeBtn.onclick = () => {
-                        if (confirm('將餘額存入帳號後此車票及視為無效票。')) {
+                        if (confirm('請留意：此車票將視為廢票，無法再次使用。'))
                             mergeTicket(id);
-                        }
                     }
                     openMergeDiv();
                 } else { setTicketDiv(uid, point); }
@@ -168,9 +167,8 @@ function startScan() {
                             mergeBtn.innerHTML = '存入帳戶';
                             unmergeBtn.onclick = () => { setTicketDiv(uid, authPoint); }
                             mergeBtn.onclick = () => {
-                                if (confirm('將餘額存入帳號後此車票及視為無效票。')) {
+                                if (confirm('請留意：此車票將視為廢票，無法再次使用。'))
                                     mergeTicket(id);
-                                }
                             }
                             openMergeDiv();
                         } else { alert('此車票已綁定在帳戶中'); }
@@ -191,7 +189,7 @@ function startScan() {
                             mergeBtn.innerHTML = '變更車票';
                             unmergeBtn.onclick = () => { setTicketDiv(localId, localPoint); }
                             mergeBtn.onclick = () => {
-                                if (confirm('點擊變更車票按鈕後，請留意：若您的車票未保存，可能導致遺失，或需前往服務中心進行車票合併。'))
+                                if (confirm('請留意：若您原先的車票未保存，可能導致遺失。'))
                                     setTicketDiv(id, point);
                             }
                             openMergeDiv();
