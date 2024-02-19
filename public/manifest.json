@@ -1,12 +1,19 @@
 {
-    "name": "Community Bus Ticket System",
+    "name": "社區巴士車票系統",
     "short_name": "CBTS",
     "id": "/",
     "start_url": "/",
+    "dir": "ltr",
+    "scope": "/",
+    "lang": "zh-Hans",
+    "orientation": "landscape",
     "display": "standalone",
+    "categories": ["lifestyle", "travel"],
     "theme_color": "#1D3557",
     "background_color": "#1D3557",
-    "description": "",
+    "description": "一個旨在提高乘客使用社區巴士車票的體驗的系統。這個系統結合了電子化和傳統紙本車票，使用QR Code來代表每張車票，從而提高了使用便利性，同時減少了耗材的浪費。",
+    "version": "1.0",
+    "author": "yesaouo",
     "icons": [
       {
         "src": "img/AppImages/CBTS48.png",
