@@ -55,6 +55,9 @@ async function mergeTicket(id) {
 onAuthStateChanged(auth, async(user) => {
     const id = localStorage.getItem('CBTS-ID') || null;
     if (user) {
+        if (user.email.endsWith('@cbts.com'))
+            auth.signOut();
+        
         userBtn.innerHTML = `<img src="${user.photoURL}">`;
         const uid = user.uid;
         const userRef = doc(db, "users", uid);
